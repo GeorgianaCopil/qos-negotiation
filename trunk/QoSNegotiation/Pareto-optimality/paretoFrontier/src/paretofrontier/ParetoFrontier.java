@@ -33,9 +33,9 @@ public class ParetoFrontier {
     static int costMinT = 1;
     static int costMaxS = 25;
     static int costMinS = 5;
-    final static double CPU_WEIGHT_CLIENT = 0.25;
-     final static double MEM_WEIGHT_CLIENT = 0.25;
-      final static double COST_WEIGHT_CLIENT = 0.5;
+    final static double CPU_WEIGHT_CLIENT = 0.4;
+     final static double MEM_WEIGHT_CLIENT = 0.2;
+      final static double COST_WEIGHT_CLIENT = 0.2;
     final static double CPU_WEIGHT_PROVIDER = 0.25;
      final static double MEM_WEIGHT_PROVIDER = 0.1;
       final static double COST_WEIGHT_PROVIDER = 0.7;  
@@ -59,37 +59,23 @@ public class ParetoFrontier {
 
             for (float cpu = 0; cpu <= 100; cpu += 1) {
                 for (float mem = 0; mem <= 100; mem += 1) {
-                    // for (int hdd = hddMinT; hdd < hddMaxS; hdd++) {
                     for (float cost = 0; cost <= 100; cost += 1) {
-                        double uClient = computeUtilityClient(cpu, mem, cost);
-                        double uProvider = computeUtilityProvider(cpu, mem, cost); 
+                        double uClient = computeEuclidianUtilityClient(cpu, mem, cost);
+                        double uProvider = computeEuclidianUtilityProvider(cpu, mem, cost); 
                         boolean ok = true;
                     
                         for (float cpu1 = 0; cpu1 <= 100; cpu1 += 1) {
                             for (float mem1 = 0; mem1 <= 100; mem1 += 1) {
-                                //for (int hdd1 = hddMinT; hdd1 < hddMaxS; hdd1++) {
                                 for (float cost1 = 0; cost1 <= 100; cost1 += 1) {
-                                    double uClient1 = computeUtilityClient(cpu1,mem1,cost1);
-                                    double uProvider1 = computeUtilityProvider(cpu1, mem1, cost1);
+                                    double uClient1 = computeEuclidianUtilityClient(cpu1,mem1,cost1);
+                                    double uProvider1 = computeEuclidianUtilityProvider(cpu1, mem1, cost1);
                                     if (cpu1 != cpu || mem1 != mem || cost1 != cost) {
                                         if (uClient<uClient1 && uProvider <  uProvider1) {
-                                            // if (uClient>uClient1 || uProvider>uProvider1){
                                             ok = false;
-
-//                                            System.out.println("==================");
-//                                            
-//                                            System.out.println(uClient+" "+uClient1+" "+uProvider+" "+uProvider1);
-//                                            System.out.println(mem1+" "+cpu1+" "+cost1);
-//                                            System.out.println(mem+" "+cpu+" "+cost);
-//                                            
-//                                            System.out.println("==================");
-
                                             break;
                                         }
                                     }
                                 }
-//                                    if (!ok) break;
-//                            }
                                 if (!ok) {
                                     break;
                                 }
@@ -99,8 +85,8 @@ public class ParetoFrontier {
                             }
                         }
                         if (ok) {
-                            out.write("Resources " + (float) (cpuMin + cpu * (cpuMax - cpuMin)) + "  " + (float) (memMin + mem * (memMax - memMin)) + "  " + (float) (costMin + cost * (costMax - costMin)) + " Utilities " + uClient + " " + " " + uProvider + " \n");
-                            System.out.println("Resources " + (float)(cpuMin+cpu * (cpuMax-cpuMin)) + "  " + (float)(memMin+mem * (memMax-memMin)) + "  " + (float)(costMin+cost * (costMax-costMin)) + " Utilities " + uClient + " " + " " + uProvider + " ");
+                            out.write("Resources " + (float) (cpuMin + cpu * (cpuMax - cpuMin)/100) + "  " + (float) (memMin + mem * (memMax - memMin)/100) + "  " + (float) (costMin + cost * (costMax - costMin)/100) + " Utilities " + uClient + " " + " " + uProvider + " \n");
+                            System.out.println("Resources " + (float)(cpuMin+cpu * (cpuMax-cpuMin)/100) + "  " + (float)(memMin+mem * (memMax-memMin)/100) + "  " + (float)(costMin+cost * (costMax-costMin)/100) + " Utilities " + uClient + " " + " " + uProvider + " ");
                             if (!utilitiesSoFar.contains(new Float(uClient))) {
                                 System.out.println((float) (cpuMin + cpu * (cpuMax - cpuMin) + memMin + mem * (memMax - memMin) + costMin + cost * (costMax - costMin)) + "  " + uClient + " " + uProvider);
                                 utilitiesSoFar.add(new Float(uClient));
