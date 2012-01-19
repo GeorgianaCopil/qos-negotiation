@@ -1,7 +1,10 @@
 package server;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+
+import client.ClientAgent;
 
 import PSO.Particle;
 
@@ -18,6 +21,13 @@ public class DataCenterAgent extends Agent{
 	 */
 	private static final long serialVersionUID = -3575535954133085186L;
 	private DataCenter dataCenter;
+	private PrintWriter file;
+	
+	public void setFile(PrintWriter file){
+		this.file = file;
+		
+	}
+	
 	int i=0;
 	@Override
 	protected void setup(){
@@ -39,6 +49,10 @@ public class DataCenterAgent extends Agent{
         ACLMessage msg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
         msg.setContent("I accept your offer");
         msg.addReceiver(new AID(GlobalVars.CLIENT_NAME + "@" + this.getContainerController().getPlatformName()));
+        
+        
+        file.close();
+        ClientAgent.fitnessOfertePrimite.close();
         this.send(msg);
     }
     
@@ -65,6 +79,7 @@ public class DataCenterAgent extends Agent{
         try {
             msg.setContentObject( offer);
             System.out.println("Offer from Server:"+offer.toString());
+			file.println("Offer from Server:" + offer.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }

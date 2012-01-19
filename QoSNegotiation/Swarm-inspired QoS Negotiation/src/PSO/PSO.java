@@ -117,7 +117,7 @@ public class PSO {
 		distance = new float[Particle.nrResources];
 
 		for(int i = 0; i < Particle.nrResources; i++)
-			distance[i] = (float) (min[i] + Math.random() * (max[i] - min[i]));
+			distance[i] = (float) (min[i]+(max[i]-min[i])/2 + Math.random() * (max[i] +min[i])/2);
 
 		
 		for (int i = 0; i < Particle.nrResources; i++) {
@@ -326,19 +326,27 @@ public class PSO {
 			float[] distance;
 			distance = currentParticle.getValue().getDistance();
 
-			for (int i = 0; i < Particle.nrResources; i++)
-				distance[i] = distance[i] -  compromise[i] * counterDistance[i];
-			
-
-			for (int i = 0; i < Particle.nrResources; i++) {
-				if (distance[i] < min[i]){
-					distance[i] = min[i];
-					System.out.println("aici");
+			for (int i = 0; i < Particle.nrResources; i++){
+				float distance_;
+				distance_ = distance[i] -  compromise[i] * counterDistance[i];
+				while(distance_ < min[i] ){
+					distance_ = (float) (distance[i] +  Math.random());//*(max[i] - min[i]));
 				}
-				if (distance[i] > max[i]){
-					distance[i] = max[i];
-				}
+				
+				while(distance_ >max[i])
+					distance_ = (float) (distance[i] -  Math.random());//*(max[i] - min[i]));
+				distance[i] = distance_;
 			}
+			
+			
+//			 for (int i = 0; i < Particle.nrResources; i++) {
+//			 if (distance[i] < min[i]){
+//			 distance[i] = min[i];
+//			 }
+//			 if (distance[i] > max[i]){
+//			 distance[i] = max[i];
+//			 }
+//			 }
 
 
 			currentParticle.getValue().setDistance(distance);

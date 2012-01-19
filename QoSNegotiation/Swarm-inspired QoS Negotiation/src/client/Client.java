@@ -3,7 +3,6 @@ package client;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 import PSO.PSO;
 import PSO.Particle;
@@ -16,119 +15,217 @@ public class Client {
 	private int swarmSize;
 	private float[] maxValues;
 	private float[] minValues;
-	private List<Offer> clientHistory;
 	Fitness fitness;
+	private long totalTime;
+	private long availableTime;
+	private int offerNumber;
+	//TODO
+	private float scale = (float)0.25;
 
-	public Client(float[] minValues, float[] maxValues) {
+	// numarul de oferte schimbate dupa care se face ajustarea compromisului
 
+	private static final int NUMBER_OF_VALUES_FOR_SCALING = 4;
+
+	// structura in care se retin valorile ofertelor agentului advers
+	private HashMap<Integer, ArrayList<Offer>> counterOffers;
+	private HashMap<Integer, ArrayList<Float>> counterOffersUtilities;
+
+	public Client(long time, float[] minValues, float[] maxValues) {
+
+		totalTime = System.currentTimeMillis() + time;
+		availableTime = time;
 		this.maxValues = maxValues;
 		this.minValues = minValues;
 		this.swarmSize = 60;
 		psoAlgorithm = new PSO();
 
-		// se initializeaza swarmul
-		psoAlgorithm.initializeSwarm(swarmSize, minValues, maxValues, maxValues);
-		clientHistory = new ArrayList<Offer>();
-		
+		// initializare
+		// valorile pentru gBest sunt: valoarea maxima posibila pentru resurse
+		// si valoarea minima posibila pentru cost
+		float gBestValues[] = new float[Particle.nrResources];
+		for (int i = 0; i < 3; i++)
+			gBestValues[i] = maxValues[i];
+		gBestValues[3] = minValues[3];
+
+		// se initializeaza popolatia
+		psoAlgorithm.initializeSwarm(swarmSize, minValues, maxValues,
+				gBestValues);
+
+		offerNumber = 0;
+
 		fitness = new Fitness();
 		fitness.setMax(maxValues);
 		fitness.setMin(minValues);
+
+		// ofertele agentului advers
+		counterOffers = new HashMap<Integer, ArrayList<Offer>>();
+		// utilitatile ofertelor agentului advers
+		counterOffersUtilities = new HashMap<Integer, ArrayList<Float>>();
+
 	}
 
 	/**
-	 * calculeaza countra oferta clientului pentru ofertele DC date de
-	 * parametrul DCOffers
-	 * 
-	 * @param DCOffers
-	 *            lista cu ofertele primite de la fiecare server din DC
-	 * @param size
-	 *            numarul de particule afectate de ofertele DC - parametru ce
-	 *            depinde de timp
-	 * @param compromise
-	 *            impactul avut de ofertele DC - parametru ce depinde de timp
-	 * @return contra oferta clientului
-	 */
-
-	/**
 	 * calculeaza impactul avut de oferta contra agentului, pentru fiecare
-	 * resursa
+	 * resursa acest factor de compromis este determinat de numarul de oferte
+	 * schimbat de agenti
 	 */
-	public float[] computeCompromise(long time) {
-		// TODO
-		float compromise[]= new float[Particle.nrResources];
-		compromise[0] = 0.02f;
-		compromise[1] = 0.096f;
-		compromise[2] = 0.005f;
-		compromise[3] =  0.03f;
+	public float[] computeCompromise(int serverNumber, float[] maxCompromise) {
+
+		// factorul de compromis va fi repr de punctele x de pe graficul
+		// functiei a*x/(x+1), unde a este valoarea maxima pentru
+		// factorul de compromis
+
+		maxCompromise = new float[Particle.nrResources];
+		maxCompromise[0] = 0.412f;
+		maxCompromise[1] = 0.3496f;
+		maxCompromise[2] = 0.6115f;
+		maxCompromise[3] = -0.0113f;
+
+		float[] randomPoint = new float[Particle.nrResources];
+		float[] compromise = new float[Particle.nrResources];
+
+		// numaram cate din ofertele agentului din intervalul
+		// [offerNumber-NUMBER_OF_VALUES_FOR_SCALING+1, offerNumber]
+		// sunt mai mari decat NUMBER_OF_VALUES_FOR_SCALING
+
+		// comparisonUtility este utilitatea ofertei cu numarul
+		// offerNumber-NUMBER_OF_VALUES_FOR_SCALING+1
+
+		float comparisonUtility;
+
+		// numarul de oferte pentru care agentul advers a redus compromisul
+		//care sunt cuprinse in intervalul [offerNumber-NUMBER_OF_VALUES_FOR_SCALING+1, offerNumber]
+		int compromisedOffers = 0;
+
+		if (offerNumber > NUMBER_OF_VALUES_FOR_SCALING
+				&& offerNumber % NUMBER_OF_VALUES_FOR_SCALING == 0) {
+			System.out.println("aici");
+			comparisonUtility = counterOffersUtilities.get(
+					offerNumber - NUMBER_OF_VALUES_FOR_SCALING + 1).get(
+					serverNumber);
+
+			for (int i = NUMBER_OF_VALUES_FOR_SCALING + 2; i >= 1; i--)
+				if (counterOffersUtilities.get(offerNumber - i).get(
+						serverNumber) < comparisonUtility)
+					compromisedOffers++;
+
+			// functie "treapta"
+			//TODO rafinat
+			
+			if (compromisedOffers / NUMBER_OF_VALUES_FOR_SCALING > 0.75)
+				scale = scale + offerNumber * 10;
+			else if (compromisedOffers / NUMBER_OF_VALUES_FOR_SCALING > 0.5)
+				scale = scale + offerNumber  * 5;
+			else if (compromisedOffers / NUMBER_OF_VALUES_FOR_SCALING > 0.25)
+				scale = (float) (scale + offerNumber  * 2.5);
+			else
+				scale = scale + 0;
+
+		}
+		
+		//TODO de ce?
+		scale = scale + offerNumber / 4;
+		
+		// random pointf in functie de oferta celulialt, sa creasca odata cu
+		// crestera compromisului celuilalt
+
+		for (int i = 0; i < Particle.nrResources; i++) {
+
+			randomPoint[i] = scale;
+			compromise[i] = maxCompromise[i] * randomPoint[i]
+					/ (randomPoint[i] + 50);
+
+		}
+
 		return compromise;
 	}
 
 	/**
 	 * calculeaza numarul de particule care sunt afectate de oferta agentului
-	 * advers
+	 * advers aceasta valoare depinde de timpul ramas pentru negociere
 	 */
-	public int computeNoAffectedParticles(long time) {
-		return 10;
+	public int computeNoAffectedParticles() {
+
+		if (availableTime / totalTime < 0.25)
+			return (int) (swarmSize * 0.25);
+		if (availableTime / totalTime < 0.5)
+			return (int) (swarmSize * 0.20);
+		if (availableTime / totalTime < 0.75)
+			return (int) (swarmSize * 0.15);
+
+		return (int) (swarmSize * 0.05);
 	}
+
+	/**
+	 * calculeaza contra oferta pentru ofertele primite de la Data Center
+	 * 
+	 * @param DCOffers
+	 *            ofertele primite de la Data Center
+	 * @return contra ofera clientului
+	 */
 
 	public Offer computeOffer(ArrayList<Offer> DCOffers) {
 
 		Offer clientOffer = new Offer();
+
+		// se memoreaza oferta agentului advers
 		Iterator<Offer> DCOfferIterator = DCOffers.iterator();
 
-		// TODO implementare computeNoAffectedParticles
-		int size = computeNoAffectedParticles(10);
+		// calculam utilitatea pentru ofertele agentului advers
+		ArrayList<Float> utilities = new ArrayList<Float>();
 
-		HashMap<Integer, Particle> selectedParticles = (HashMap<Integer, Particle>) psoAlgorithm
-				.selectParticles(size);
-		List<Particle> counterOffers = new ArrayList<Particle>();
+		while (DCOfferIterator.hasNext()) {
 
-		// TODO implementare computeCompormise
-		float[] compromise = computeCompromise(10);
+			Offer currentOffer = DCOfferIterator.next();
+			utilities.add(new Float(currentOffer.getFitness()));
 
+		}
+
+		counterOffers.put(offerNumber, DCOffers);
+		counterOffersUtilities.put(offerNumber, utilities);
+
+		// s-a mai schimbat o oferta intre client si Data Center
+		offerNumber++;
+
+		// se calculeaza timpul ramas pentru negociere
+		availableTime = totalTime - System.currentTimeMillis();
+
+		int size = computeNoAffectedParticles();
+
+		HashMap<Integer, Particle> selectedParticles;// = (HashMap<Integer, Particle>) psoAlgorithm.selectParticles(size);
+		HashMap<Integer, Particle> totalSelectedParticles = new HashMap<Integer, Particle>();
 		// modifica distantele particulelor in functie de ofertele serverelor
 		// din DC
+
+		DCOfferIterator = DCOffers.iterator();
+		int i = 0;
 		while (DCOfferIterator.hasNext()) {
 
 			float[] counterDistance = new float[Particle.nrResources];
+			selectedParticles = (HashMap<Integer, Particle>) psoAlgorithm
+				.selectParticles(size/DCOffers.size());
 			Offer offer = DCOfferIterator.next();
 			counterDistance[0] = offer.getHdd();
 			counterDistance[1] = offer.getCpu();
 			counterDistance[2] = offer.getMemory();
 			counterDistance[3] = offer.getCost();
 
+			float[] compromise = computeCompromise(i, null);
 
-			counterOffers.addAll(new ArrayList<Particle>((psoAlgorithm
-					.alterDistance(selectedParticles, compromise,
-							counterDistance)).values()));
+			psoAlgorithm.alterDistance(selectedParticles, compromise,
+					counterDistance).values();
+			totalSelectedParticles.putAll(selectedParticles);
+			i++;
 		}
 
-		// se selecteaza aleator o particula din particulele modificate
-		// aceasta particula reprezinta contra-oferta clientului
-
-//		int random = (int) (Math.random() * counterOffers.size());
-//		int random = 1 + (int)(Math.random() * ((counterOffers.size() - 1) + 1));
-//		int counter = 0;
-//		Iterator<Particle> counterOfferIterator = counterOffers.iterator();
-//		Particle selectedParticle = null;
-//
-//		while (counter < random && counterOfferIterator.hasNext()) {
-//
-//			counter++;
-//			selectedParticle = counterOfferIterator.next();
-//		}
-
-		//float[] distance = selectedParticle.getDistance();
-		Particle selectedParticle = psoAlgorithm.averageParticle(selectedParticles);
+		Particle selectedParticle = psoAlgorithm
+				.averageParticle(totalSelectedParticles);
 
 		clientOffer.setHdd(selectedParticle.getDistance()[0]);
 		clientOffer.setCpu(selectedParticle.getDistance()[1]);
 		clientOffer.setMemory(selectedParticle.getDistance()[2]);
 		clientOffer.setCost(selectedParticle.getDistance()[3]);
-
-		// se adauga oferta la istoricul clientului
-		clientHistory.add(clientOffer);
-
+		fitness.rateOffer(clientOffer);
 		return clientOffer;
 
 	}
@@ -143,38 +240,29 @@ public class Client {
 	 * @return true daca se accepta o oferta, false altfel
 	 */
 	public boolean acceptOffer(ArrayList<Offer> DCOffers, int time) {
-		
+
 		Iterator<Offer> iterator = DCOffers.iterator();
 		Offer serverOffer;
-		
-		while(iterator.hasNext()){
-			
+
+		while (iterator.hasNext()) {
+
 			serverOffer = iterator.next();
-			if(serverOffer.getFitness() > 0.8)
-			//
+			if (serverOffer.getFitness() > 0.4 && serverOffer.getCostP() < 0.6)
+
 				return true;
-			
+
 		}
+
 		return false;
 	}
 
 	/**
-	 * actualizeaza valorile parametrilor din swarm
-	 * 
-	 * @param time
-	 *            timpul ramas pentru negociere
+	 * actualizeaza particulele din swarm dupa algoritmul clasic PSO
 	 */
-
-	public float updateInitialWeight(long time) {
-		// TODO
-		return 1f;
-	}
-
 	public void updateSwarm() {
 
-		// TODO rafinat paramterii
 		int c1 = 2, c2 = 2;
-		float W = 0.5f;//updateInitialWeight(0);
+		float W = 0.75f;// updateInitialWeight(0);
 
 		psoAlgorithm.alterParticles(psoAlgorithm.getParticles(), c1, c2, W);
 
@@ -194,6 +282,10 @@ public class Client {
 
 	public float[] getMinValues() {
 		return minValues;
+	}
+
+	public int getOfferNumber() {
+		return offerNumber;
 	}
 
 }

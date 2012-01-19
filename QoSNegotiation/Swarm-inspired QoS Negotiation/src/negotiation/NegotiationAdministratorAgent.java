@@ -1,5 +1,8 @@
 package negotiation;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+
 import server.DataCenterAgent;
 import client.ClientAgent;
 import jade.core.Agent;
@@ -19,6 +22,7 @@ public class NegotiationAdministratorAgent extends Agent {
 	private AgentController clientAgentController;
 	private AgentController dataCenterAgentController;
 	private static Agent agent;
+	private static PrintWriter file;
 	float[] minS;
 	float[] maxS;
 	float[] minC;
@@ -27,6 +31,12 @@ public class NegotiationAdministratorAgent extends Agent {
 	public NegotiationAdministratorAgent() {
 		
 		agent = this;
+		try {
+			file = new PrintWriter("rezultate.txt");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	
 	}
 
@@ -38,7 +48,6 @@ public class NegotiationAdministratorAgent extends Agent {
 			clientAgentController = container.createNewAgent(
 					GlobalVars.CLIENT_NAME, ClientAgent.class.getName(),
 					new Object[]{null, null, null});
-				//	new Object[] { 30, minC, maxC, 100 });
 		} catch (ControllerException ex) {
 			ex.printStackTrace();
 		}
@@ -53,7 +62,6 @@ public class NegotiationAdministratorAgent extends Agent {
 				dataCenterAgentController = container.createNewAgent(
 						GlobalVars.SERVICE_CENTER_NAME,
 						DataCenterAgent.class.getName(), 
-						//new Object[] { 6, 20,minS, maxS, 100 });
 						new Object[]{null, null, null});
 			} catch (ControllerException ex) {
 				ex.printStackTrace();
@@ -67,5 +75,9 @@ public class NegotiationAdministratorAgent extends Agent {
 
 	public static Agent getNegotiationStarterInstance() {
 		return agent;
+	}
+
+	public static PrintWriter getFile() throws FileNotFoundException {
+		return file;
 	}
 }
