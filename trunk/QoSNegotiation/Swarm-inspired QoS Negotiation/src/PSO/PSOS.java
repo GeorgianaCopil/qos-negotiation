@@ -3,7 +3,6 @@ package PSO;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class PSOS {
 
 	private Map<Integer, Particle> particles;
@@ -14,23 +13,24 @@ public class PSOS {
 	public PSOS() {
 
 	}
-	
-	public void initializeGBest(float[] values){
-		
+
+	public void initializeGBest(float[] values) {
+
 		gBest = new Particle();
 		gBest.setDistance(values);
 		gBest.setVelocity(values);
 	}
 
-	public void initializeSwarm(int size, float min[], float max[], float[] gBestValues) {
+	public void initializeSwarm(int size, float min[], float max[],
+			float[] gBestValues) {
 
 		particles = new HashMap<Integer, Particle>();
-		
+
 		this.min = min;
 		this.max = max;
-		
+
 		initializeGBest(gBestValues);
-		
+
 		int id = 1;
 
 		while (particles.size() < size) {
@@ -38,7 +38,6 @@ public class PSOS {
 			id++;
 		}
 
-		
 	}
 
 	public Map<Integer, Particle> getParticles() {
@@ -70,23 +69,22 @@ public class PSOS {
 		velocity = new float[Particle.nrResources];
 		distance = new float[Particle.nrResources];
 
-		for(int i = 0 ; i < Particle.nrResources; i++ )
+		for (int i = 0; i < Particle.nrResources; i++)
 			distance[i] = (float) (min[i] + Math.random() * (max[i] - min[i]));
-		
-		for(int i = 0; i< Particle.nrResources; i++){
-			if(distance[i]< min[i])
+
+		for (int i = 0; i < Particle.nrResources; i++) {
+			if (distance[i] < min[i])
 				distance[i] = min[i];
-			if(distance[i]>max[i])
+			if (distance[i] > max[i])
 				distance[i] = max[i];
 		}
 
-		for(int i = 0; i < Particle.nrResources; i++){
+		for (int i = 0; i < Particle.nrResources; i++) {
 			float minV = -Math.abs(max[i] - min[i]);
-			float maxV = Math.abs(max[i]-min[i]);
-		
+			float maxV = Math.abs(max[i] - min[i]);
+
 			velocity[i] = (float) (minV + Math.random() * (maxV - minV));
 		}
-
 
 		particle.setDistance(distance);
 		particle.setVelocity(velocity);
@@ -95,27 +93,26 @@ public class PSOS {
 		return particle;
 	}
 
-//	public void updateGBest(Map<Integer, Particle> particles) {
-//
-//		Particle tmpBest = new Particle();
-//		tmpBest.setFitness(0.0f);
-//
-//		for (Map.Entry<Integer, Particle> presentParticle : particles
-//				.entrySet()) {
-//
-//			if (presentParticle.getValue().getFitness() < tmpBest.getFitness()) {
-//				tmpBest.setDistance(presentParticle.getValue().getDistance());
-//				tmpBest.setVelocity(presentParticle.getValue().getVelocity());
-//				tmpBest.setFitness(presentParticle.getValue().getFitness());
-//			}
-//		}
-//
-//		gBest.setDistance(tmpBest.getDistance());
-//		gBest.setVelocity(tmpBest.getDistance());
-//		gBest.setFitness(tmpBest.getFitness());
-//	}
+	// public void updateGBest(Map<Integer, Particle> particles) {
+	//
+	// Particle tmpBest = new Particle();
+	// tmpBest.setFitness(0.0f);
+	//
+	// for (Map.Entry<Integer, Particle> presentParticle : particles
+	// .entrySet()) {
+	//
+	// if (presentParticle.getValue().getFitness() < tmpBest.getFitness()) {
+	// tmpBest.setDistance(presentParticle.getValue().getDistance());
+	// tmpBest.setVelocity(presentParticle.getValue().getVelocity());
+	// tmpBest.setFitness(presentParticle.getValue().getFitness());
+	// }
+	// }
+	//
+	// gBest.setDistance(tmpBest.getDistance());
+	// gBest.setVelocity(tmpBest.getDistance());
+	// gBest.setFitness(tmpBest.getFitness());
+	// }
 
-	
 	public Map<Integer, Particle> alterParticles(
 			Map<Integer, Particle> particles, float c1, float c2, float W) {
 
@@ -133,42 +130,38 @@ public class PSOS {
 			particleDistance = presentParticle.getValue().getDistance();
 			particleVelocity = presentParticle.getValue().getVelocity();
 			particleBest = presentParticle.getValue().getPbest();
-			
-			
-			for(int i = 0; i < Particle.nrResources; i++)
-				velocity[i] = (float) (W
-				* particleVelocity[i]
-				+ Math.random()
-				* c1
-				* (presentParticle.getValue().getPbest()[i] - particleDistance[i]) + Math
-				.random()
-				* c2
-				* (gBest.getDistance()[i] - particleDistance[i]));
 
-			
+			for (int i = 0; i < Particle.nrResources; i++)
+				velocity[i] = (float) (W
+						* particleVelocity[i]
+						+ Math.random()
+						* c1
+						* (presentParticle.getValue().getPbest()[i] - particleDistance[i]) + Math
+						.random()
+						* c2
+						* (gBest.getDistance()[i] - particleDistance[i]));
+
 			// se tesetaza consistenta valorilor obtinute
-			for (int i = 0; i < Particle.nrResources; i++){
-				particleDistance[i] = particleDistance[i]+velocity[i];
-				
-				if (particleDistance[i] < min[i]){
+			for (int i = 0; i < Particle.nrResources; i++) {
+				particleDistance[i] = particleDistance[i] + velocity[i];
+
+				if (particleDistance[i] < min[i]) {
 					particleDistance[i] = min[i];
-				}
-				else if (particleDistance[i] > max[i]){
+				} else if (particleDistance[i] > max[i]) {
 					particleDistance[i] = max[i];
 				}
 			}
-			
+
 			newParticle.setDistance(particleDistance);
 			newParticle.setVelocity(velocity);
-			
+
 			newParticle.setPbest(particleBest);
-			newParticle.updatePBest(gBest,particleBest);
-			
+			newParticle.updatePBest(gBest, particleBest);
+
 			newParticles.put(presentParticle.getKey(), newParticle);
 
 		}
 
-		
 		updateSwarm(newParticles);
 		return newParticles;
 
@@ -202,8 +195,9 @@ public class PSOS {
 		return selectedParticles;
 	}
 
-	public Map<Integer, Particle> alterVelocities(Map<Integer, Particle> particles,
-			float[] compromise, float[] counterVelocity) {
+	public Map<Integer, Particle> alterVelocities(
+			Map<Integer, Particle> particles, float[] compromise,
+			float[] counterVelocity) {
 
 		for (Map.Entry<Integer, Particle> currentParticle : particles
 				.entrySet()) {
@@ -211,9 +205,9 @@ public class PSOS {
 			float[] velocity;
 			velocity = currentParticle.getValue().getVelocity();
 
-			for(int i = 0; i < Particle.nrResources; i++)
+			for (int i = 0; i < Particle.nrResources; i++)
 				velocity[i] = velocity[i] + compromise[i] * counterVelocity[i];
-			
+
 			for (int i = 0; i < Particle.nrResources; i++) {
 				if (velocity[i] < min[i])
 					velocity[i] = min[i];
@@ -222,7 +216,6 @@ public class PSOS {
 					velocity[i] = max[i];
 
 			}
-
 
 			currentParticle.getValue().setVelocity(velocity);
 
@@ -251,7 +244,6 @@ public class PSOS {
 
 	}
 
-	
 	public Map<Integer, Particle> alterDistance(
 			Map<Integer, Particle> particles, float[] compromise,
 			float[] counterDistance) {
@@ -262,19 +254,27 @@ public class PSOS {
 			float[] distance;
 			distance = currentParticle.getValue().getDistance();
 
-			for (int i = 0; i < Particle.nrResources; i++)
-				distance[i] = distance[i] + compromise[i] * counterDistance[i];
-			
-
 			for (int i = 0; i < Particle.nrResources; i++) {
-				if (distance[i] < min[i]){
-					distance[i] = min[i];
+				float distance_;
+				distance_ = distance[i] + compromise[i] * counterDistance[i];
+				while(distance_ < min[i] ){
+					distance_ = (float) (distance[i] +  Math.random());//*(max[i] - min[i]));
 				}
-				if (distance[i] > max[i]){
-					distance[i] = max[i];
-				}
+				
+				while(distance_ >max[i])
+					distance_ = (float) (distance[i] -  Math.random());//*(max[i] - min[i]));
+				distance[i] = distance_;
 			}
 
+			//
+			// for (int i = 0; i < Particle.nrResources; i++) {
+			// if (distance[i] < min[i]){
+			// distance[i] = min[i];
+			// }
+			// if (distance[i] > max[i]){
+			// distance[i] = max[i];
+			// }
+			// }
 
 			currentParticle.getValue().setDistance(distance);
 		}
@@ -282,25 +282,27 @@ public class PSOS {
 		updateSwarm(particles);
 		return particles;
 	}
-	
-public Particle averageParticle(Map<Integer, Particle> selectedParticles){
-		
+
+	public Particle averageParticle(Map<Integer, Particle> selectedParticles) {
+
 		Particle average = new Particle();
 		float[] resource = new float[Particle.nrResources];
-		for(int i = 0; i < Particle.nrResources; i++)
+		for (int i = 0; i < Particle.nrResources; i++)
 			resource[i] = 0;
-		for (Map.Entry<Integer, Particle> presentParticle : selectedParticles.entrySet()) {
-			for(int i = 0; i < Particle.nrResources; i++)
-				resource[i] = resource[i] + presentParticle.getValue().getDistance()[i];
-		 }
-		for(int i = 0; i < Particle.nrResources; i++)
-			resource[i]= resource[i]/selectedParticles.size(); 
-		
+		for (Map.Entry<Integer, Particle> presentParticle : selectedParticles
+				.entrySet()) {
+			for (int i = 0; i < Particle.nrResources; i++)
+				resource[i] = resource[i]
+						+ presentParticle.getValue().getDistance()[i];
+		}
+		for (int i = 0; i < Particle.nrResources; i++)
+			resource[i] = resource[i] / selectedParticles.size();
+
 		average.setDistance(resource);
 		average.setVelocity(resource);
 		average.setPbest(resource);
 		return average;
-		
+
 	}
 
 }

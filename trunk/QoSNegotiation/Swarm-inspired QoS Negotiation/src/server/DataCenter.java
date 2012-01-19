@@ -19,6 +19,7 @@ public class DataCenter {
 
 	public DataCenter(int numberOfServers, float[] maxValues, float[] minValues) {
 
+		numberOfServers = 1;
 		this.setNumberOfServers(numberOfServers);
 		this.servers = new HashMap<Integer, Server>();
 		offerHistory = new ArrayList<Offer>();

@@ -1,7 +1,9 @@
 package server;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
+import negotiation.NegotiationAdministratorAgent;
 import negotiation.Offer;
 
 import jade.core.Agent;
@@ -19,6 +21,12 @@ public class ReceiveMessageDCBehaviour extends CyclicBehaviour {
 
 	public ReceiveMessageDCBehaviour(Agent dataCenterAgent) {
 		this.dataCenterAgent = (DataCenterAgent) dataCenterAgent;
+		try {
+			this.dataCenterAgent.setFile(NegotiationAdministratorAgent.getFile());
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override

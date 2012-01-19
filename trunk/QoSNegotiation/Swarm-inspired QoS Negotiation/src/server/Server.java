@@ -17,13 +17,30 @@ public class Server {
 	Fitness fitness;
 	private List<RelativeDistance> relativeDistances;
 	int i = 0;
+	private long totalTime;
+	private long availableTime;
+	private float scale = 0;
+	private int offerNumber;
 
 	public Server(float[] minValues, float[] maxValues, int size) {
 
+		
+		totalTime = 10000;
+		availableTime = 10000;
+		
+		offerNumber = 0;
+		
 		psoAlgorithm = new PSOS();
 		serverHistory = new ArrayList<Offer>();
 		relativeDistances = new ArrayList<RelativeDistance>();
-		psoAlgorithm.initializeSwarm(size, minValues, maxValues, minValues);
+		
+		float gBestValues[] = new float[Particle.nrResources];
+		
+		for(int i = 0 ; i < 3; i++)
+			gBestValues[i] = minValues[i];
+		gBestValues[3] = maxValues[3];
+		
+		psoAlgorithm.initializeSwarm(size, minValues, maxValues, gBestValues);
 		this.swarmSize = size;
 		this.fitness = new Fitness();
 		
@@ -38,23 +55,46 @@ public class Server {
 	 * @return factorul de compromis
 	 */
 	private float[] computeCompromise(int timeLeft) {
-		// TODO
+		
+		float[] maxCompromise = new float[Particle.nrResources];
+		
+		maxCompromise = new float[Particle.nrResources];
+		
+		maxCompromise[0] = 0.612f;
+		maxCompromise[1] = 0.7496f;
+		maxCompromise[2] = 0.2115f;
+		maxCompromise[3] = -0.413f;
+
+		float[] randomPoint = new float[Particle.nrResources];
 		float[] compromise = new float[Particle.nrResources];
-		compromise[0] = 0.194f;
-		compromise[1] = 0.32f;
-		compromise[2] = 0.08f;
-		compromise[3] = 0.001f;
+		
+		scale = (float) (scale + offerNumber*4);
+		
+		
+		for (int i = 0; i < Particle.nrResources; i++) {
+
+			randomPoint[i] =  scale;
+			compromise[i] = maxCompromise[i] * randomPoint[i]
+					/ (randomPoint[i] + 50);
+		}
+
 		return compromise;
 	}
 
 	/**
 	 * calculeaza numarul de particule afectate de oferta clientului
-	 * @param timeLeft timpul ramas pentru negociere
 	 * @return numarul de particule afectate de oferta clientului
 	 */
-	private int numberOfAlteredParticles(int timeLeft) {
-		// TODO
-		return swarmSize * 30 / 100;
+	private int numberOfAlteredParticles() {
+		
+		if (availableTime / totalTime < 0.25)
+			return (int) (swarmSize * 0.25);
+		if (availableTime / totalTime < 0.5)
+			return (int) (swarmSize * 0.20);
+		if (availableTime / totalTime < 0.75)
+			return (int) (swarmSize * 0.15);
+
+		return (int) (swarmSize * 0.05);
 	}
 	
 
@@ -69,6 +109,8 @@ public class Server {
 
 		float[] counterDistance = new float[Particle.nrResources];
 		
+		offerNumber++;
+		
 		counterDistance[0] = clientOffer.getHdd();
 		counterDistance[1] = clientOffer.getCpu();
 		counterDistance[2] = clientOffer.getMemory();
@@ -76,12 +118,11 @@ public class Server {
 
 		Map<Integer, Particle> alteredParticles = psoAlgorithm.alterDistance(
 				psoAlgorithm
-						.selectParticles(numberOfAlteredParticles(timeLeft)),
+						.selectParticles(numberOfAlteredParticles()),
 				computeCompromise(timeLeft), counterDistance);
 
-//		Particle selectedParticle = psoAlgorithm
-//				.selectParticle(alteredParticles);
-		Particle selectedParticle = psoAlgorithm.averageParticle(alteredParticles);
+		Particle selectedParticle = psoAlgorithm
+				.selectParticle(alteredParticles);
 
 		Offer serverOffer = new Offer();
 		serverOffer.setHdd(selectedParticle.getDistance()[0]);
@@ -91,11 +132,6 @@ public class Server {
 
 		serverHistory.add(serverOffer);
 		
-//		relativeDistances.add(new RelativeDistance(clientOffer.getHdd()
-//				/ serverOffer.getHdd(), clientOffer.getCpu()
-//				/ serverOffer.getCpu(), clientOffer.getMemory()
-//				/ serverOffer.getMemory()));
-
 		return serverOffer;
 	}
 	
@@ -105,9 +141,8 @@ public class Server {
 	 */
 	public void updateSwarm(int time){
 		
-		//TODO rafinat paramterii 
 		int c1 = 2, c2 = 2;
-		float W = 0.3f;
+		float W = 0.6f;
 		
 		psoAlgorithm.alterParticles(psoAlgorithm.getParticles(), c1, c2, W);
 		
@@ -124,7 +159,7 @@ public class Server {
 		
 		fitness.rateOffer(clientOffer);
 		
-		if(clientOffer.getFitness() < 0.15){
+		if(clientOffer.getFitness() < 0.5){
 			return true;
 		}
 		return false;

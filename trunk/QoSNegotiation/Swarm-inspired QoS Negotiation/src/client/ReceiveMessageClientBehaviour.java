@@ -1,9 +1,11 @@
 package client;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import negotiation.NegotiationAdministratorAgent;
 import negotiation.Offer;
 
 import jade.core.Agent;
@@ -22,6 +24,12 @@ public class ReceiveMessageClientBehaviour extends CyclicBehaviour {
 
 	public ReceiveMessageClientBehaviour(Agent agent) {
 		clientAgent = (ClientAgent) agent;
+		try {
+			clientAgent.setFile(NegotiationAdministratorAgent.getFile());
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -48,6 +56,7 @@ public class ReceiveMessageClientBehaviour extends CyclicBehaviour {
 					if (counterOffer == null)
 						clientAgent.sendRefuseOfferMessage();
 					else {
+						
 						clientAgent.sendMessage(counterOffer);
 						clientAgent.getClient().updateSwarm();
 					}
