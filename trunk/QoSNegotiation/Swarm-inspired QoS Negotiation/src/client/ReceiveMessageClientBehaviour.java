@@ -1,11 +1,9 @@
 package client;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import negotiation.NegotiationAdministratorAgent;
 import negotiation.Offer;
 
 import jade.core.Agent;
@@ -24,12 +22,7 @@ public class ReceiveMessageClientBehaviour extends CyclicBehaviour {
 
 	public ReceiveMessageClientBehaviour(Agent agent) {
 		clientAgent = (ClientAgent) agent;
-		try {
-			clientAgent.setFile(NegotiationAdministratorAgent.getFile());
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 	}
 
 	@Override
@@ -48,8 +41,11 @@ public class ReceiveMessageClientBehaviour extends CyclicBehaviour {
 				ArrayList<Offer> offers = (ArrayList<Offer>) message
 						.getContentObject();
 			
-				if (clientAgent.getClient().acceptOffer(offers, 10))
+				if (clientAgent.getClient().acceptOffer(offers, 10)){
+					System.err.println("Client: Offer accepted ");
 					clientAgent.sendAcceptOfferMessage();
+					
+				}
 				else {
 					Offer counterOffer = clientAgent.getClient().computeOffer(
 							offers);
@@ -57,8 +53,10 @@ public class ReceiveMessageClientBehaviour extends CyclicBehaviour {
 						clientAgent.sendRefuseOfferMessage();
 					else {
 						
+				//		counterOffer.resetInfo();
 						clientAgent.sendMessage(counterOffer);
 						clientAgent.getClient().updateSwarm();
+						
 					}
 				}
 			} catch (UnreadableException ex) {
@@ -68,10 +66,12 @@ public class ReceiveMessageClientBehaviour extends CyclicBehaviour {
 		}
 			break;
 		case ACLMessage.ACCEPT_PROPOSAL: {
+			clientAgent.printNegotiationResults("client");
 			System.out.println("Client: WoooHooo!");
 		}
 			break;
 		case ACLMessage.REJECT_PROPOSAL: {
+			clientAgent.printNegotiationResults("client");
 			System.out.println("Client: Sorry.");
 		}
 			break;

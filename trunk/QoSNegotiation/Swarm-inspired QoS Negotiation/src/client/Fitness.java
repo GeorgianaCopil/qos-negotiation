@@ -19,10 +19,6 @@ public class Fitness {
 		this.offers = new ArrayList<Offer>();
 		this.weight = new float[Particle.nrResources];
 
-		weight[0] = 1;
-		weight[1] = 1;
-		weight[2] = 1;
-		weight[3] = 2;
 	}
 
 	public void rateOffer(Offer offer) {
@@ -40,9 +36,9 @@ public class Fitness {
 
 	private float offerPercent(Offer offer) {
 
-		return (offer.getHddP() * weight[0] + offer.getCpuP() * weight[1]
-				+ offer.getMemoryP() * weight[2] )
-				/ (weight[1] + weight[2] + weight[0]);
+		return Math.abs((offer.getHddP() * weight[0] + offer.getCpuP() * weight[1]
+				+ offer.getMemoryP() * weight[2] +offer.getCostP()*weight[3]));
+				
 
 	}
 
@@ -86,5 +82,7 @@ public class Fitness {
 	public void setMin(float[] min) {
 		this.min = min;
 	}
+	
+	
 
 }

@@ -1,8 +1,5 @@
 package negotiation;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-
 import server.DataCenterAgent;
 import client.ClientAgent;
 import jade.core.Agent;
@@ -22,22 +19,12 @@ public class NegotiationAdministratorAgent extends Agent {
 	private AgentController clientAgentController;
 	private AgentController dataCenterAgentController;
 	private static Agent agent;
-	private static PrintWriter file;
-	float[] minS;
-	float[] maxS;
-	float[] minC;
-	float[] maxC;
+
 
 	public NegotiationAdministratorAgent() {
 		
 		agent = this;
-		try {
-			file = new PrintWriter("rezultate.txt");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	
+		
 	}
 
 	@Override
@@ -77,7 +64,4 @@ public class NegotiationAdministratorAgent extends Agent {
 		return agent;
 	}
 
-	public static PrintWriter getFile() throws FileNotFoundException {
-		return file;
-	}
 }
