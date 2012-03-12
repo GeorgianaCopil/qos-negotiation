@@ -1,11 +1,7 @@
 package server;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
-
-import negotiation.NegotiationAdministratorAgent;
 import negotiation.Offer;
-
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -21,12 +17,6 @@ public class ReceiveMessageDCBehaviour extends CyclicBehaviour {
 
 	public ReceiveMessageDCBehaviour(Agent dataCenterAgent) {
 		this.dataCenterAgent = (DataCenterAgent) dataCenterAgent;
-		try {
-			this.dataCenterAgent.setFile(NegotiationAdministratorAgent.getFile());
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	@Override
@@ -46,14 +36,16 @@ public class ReceiveMessageDCBehaviour extends CyclicBehaviour {
 					System.err.println("ServiceCenterServer Offer accepted: "
 							+ offer.toString());
 					dataCenterAgent.sendAcceptOfferMessage();
+					dataCenterAgent.printNegotiationResults("dataCenter");
 				} else {
 					ArrayList<Offer> offers = dataCenterAgent
 							.computeCounterOffer(offer);
-					dataCenterAgent.waitForOffer(10);
+					dataCenterAgent.waitForOffer();
 					if (offers.isEmpty()) {
 						dataCenterAgent.sendRefuseOfferMessage();
 					} else {
-
+						
+						
 						dataCenterAgent.sendMessage(offers);
 					}
 				}
@@ -63,6 +55,7 @@ public class ReceiveMessageDCBehaviour extends CyclicBehaviour {
 		}
 			break;
 		case ACLMessage.ACCEPT_PROPOSAL: {
+			dataCenterAgent.printNegotiationResults("dataCenter");
 			System.out.println("ServiceCenter Server: WoooHooo!");
 		}
 			break;

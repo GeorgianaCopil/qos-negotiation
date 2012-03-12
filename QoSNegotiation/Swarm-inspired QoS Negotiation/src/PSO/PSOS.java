@@ -93,25 +93,6 @@ public class PSOS {
 		return particle;
 	}
 
-	// public void updateGBest(Map<Integer, Particle> particles) {
-	//
-	// Particle tmpBest = new Particle();
-	// tmpBest.setFitness(0.0f);
-	//
-	// for (Map.Entry<Integer, Particle> presentParticle : particles
-	// .entrySet()) {
-	//
-	// if (presentParticle.getValue().getFitness() < tmpBest.getFitness()) {
-	// tmpBest.setDistance(presentParticle.getValue().getDistance());
-	// tmpBest.setVelocity(presentParticle.getValue().getVelocity());
-	// tmpBest.setFitness(presentParticle.getValue().getFitness());
-	// }
-	// }
-	//
-	// gBest.setDistance(tmpBest.getDistance());
-	// gBest.setVelocity(tmpBest.getDistance());
-	// gBest.setFitness(tmpBest.getFitness());
-	// }
 
 	public Map<Integer, Particle> alterParticles(
 			Map<Integer, Particle> particles, float c1, float c2, float W) {
@@ -195,36 +176,6 @@ public class PSOS {
 		return selectedParticles;
 	}
 
-	public Map<Integer, Particle> alterVelocities(
-			Map<Integer, Particle> particles, float[] compromise,
-			float[] counterVelocity) {
-
-		for (Map.Entry<Integer, Particle> currentParticle : particles
-				.entrySet()) {
-
-			float[] velocity;
-			velocity = currentParticle.getValue().getVelocity();
-
-			for (int i = 0; i < Particle.nrResources; i++)
-				velocity[i] = velocity[i] + compromise[i] * counterVelocity[i];
-
-			for (int i = 0; i < Particle.nrResources; i++) {
-				if (velocity[i] < min[i])
-					velocity[i] = min[i];
-
-				else if (velocity[i] > max[i])
-					velocity[i] = max[i];
-
-			}
-
-			currentParticle.getValue().setVelocity(velocity);
-
-		}
-		updateSwarm(particles);
-		return particles;
-
-	}
-
 	public Particle selectParticle(Map<Integer, Particle> particles) {
 
 		int random = (int) (Math.random() * particles.size() + 1);
@@ -265,16 +216,6 @@ public class PSOS {
 					distance_ = (float) (distance[i] -  Math.random());//*(max[i] - min[i]));
 				distance[i] = distance_;
 			}
-
-			//
-			// for (int i = 0; i < Particle.nrResources; i++) {
-			// if (distance[i] < min[i]){
-			// distance[i] = min[i];
-			// }
-			// if (distance[i] > max[i]){
-			// distance[i] = max[i];
-			// }
-			// }
 
 			currentParticle.getValue().setDistance(distance);
 		}

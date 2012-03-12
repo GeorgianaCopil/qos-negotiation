@@ -38,7 +38,7 @@ public class Offer implements Serializable{
 	@Override
 	public String toString() {
 		return "Offer [cpu=" + cpu + ", memory=" + memory + ", hdd=" + hdd
-				+ ", cost="+cost+"]";
+				+ ", cost="+cost+", fitness= "+fitness+"]";
 	}
 
 	public void setMemoryP(float memoryP) {
@@ -88,7 +88,6 @@ public class Offer implements Serializable{
 	public float getCost() {
 		return cost;
 	}
-
 	
 	
 }
