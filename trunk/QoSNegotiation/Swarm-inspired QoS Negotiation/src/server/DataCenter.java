@@ -1,5 +1,7 @@
 package server;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,28 +12,40 @@ import negotiation.Offer;
 public class DataCenter {
 
 	private Map<Integer, Server> servers;
-	private List<Offer> offerHistory;
 	private int numberOfServers;
 	private int timeLeft;
+	private long totalTime;
 	private Server acceptedServer;
 	private float[] minValues;
 	private float[] maxValues;
 
-	public DataCenter(int numberOfServers, float[] maxValues, float[] minValues) {
+	public DataCenter(long totalTime, int numberOfServers,
+			HashMap<Integer, Integer> swarmSizeAll, float[] maxValues,
+			float[] minValues, HashMap<Integer, Float> threshold_lower, HashMap<Integer, Float> threshold_upper,
+			HashMap<Integer, Float[]> resourceWeightAll,
+			HashMap<Integer, Float[]> maxCompromiseAll) {
 
-		numberOfServers = 1;
 		this.setNumberOfServers(numberOfServers);
 		this.servers = new HashMap<Integer, Server>();
-		offerHistory = new ArrayList<Offer>();
 		this.setMaxValues(maxValues);
 		this.setMinValues(minValues);
+		this.setTotalTime(totalTime);
+		int counter = 0;
+
 		while (numberOfServers > 0) {
-			// TODO  nr popularie variabila
-			
-			this.servers.put(numberOfServers, new Server(minValues, maxValues,
-					30));
+
+			int swarmSize = swarmSizeAll.get(counter);
+
+			Server server = new Server(minValues, maxValues,
+					resourceWeightAll.get(counter), swarmSize);
+			server.setTotalTime(totalTime);
+			server.setThreshold(threshold_lower.get(counter), threshold_upper.get(counter));
+			server.setMaxCompromise(maxCompromiseAll.get(counter));
+			this.servers.put(numberOfServers, server);
 			numberOfServers--;
+			counter++;
 		}
+
 	}
 
 	public List<Offer> sendCounterOffers(Offer clientOffer) {
@@ -39,39 +53,19 @@ public class DataCenter {
 		List<Offer> counterOffers = new ArrayList<Offer>();
 
 		for (Map.Entry<Integer, Server> server : servers.entrySet()) {
+
 			counterOffers.add(server.getValue().computeOffer(clientOffer,
 					timeLeft));
 		}
 		return counterOffers;
 
 	}
-	
-	public void waitForOffer(int time){
+
+	public void waitForOffer() {
 		for (Map.Entry<Integer, Server> server : servers.entrySet()) {
-			
-			//TODO timpul
-			time = 10;
-			server.getValue().updateSwarm(10);
+
+			server.getValue().updateSwarm();
 		}
-		
-	}
-
-	/**
-	 * adauga oferta clientului la istoricul ofertelor
-	 * 
-	 * @param offer
-	 *            oferta clientului
-	 */
-	public void saveOffer(Offer offer) {
-
-		offerHistory.add(offer);
-	}
-
-	/**
-	 * determina daca un server poate fi "scos" din negociere
-	 *TODO 
-	 */
-	public void pruneServer() {
 
 	}
 
@@ -83,7 +77,7 @@ public class DataCenter {
 	 * @return true daca se accepta oferta, false altfel
 	 */
 	public boolean acceptOffer(Offer clientOffer) {
-		
+
 		for (Map.Entry<Integer, Server> server : servers.entrySet()) {
 
 			if (server.getValue().acceptOffer(clientOffer, timeLeft)) {
@@ -124,6 +118,64 @@ public class DataCenter {
 
 	public Server getAcceptedServer() {
 		return acceptedServer;
+	}
+
+	public long getTotalTime() {
+		return totalTime;
+	}
+
+	public void setTotalTime(long totalTime) {
+		this.totalTime = totalTime;
+	}
+
+	public void printNegotiationResults(String filename) {
+
+		PrintWriter result_file = null;
+		PrintWriter fitness_file  = null;
+		HashMap<Integer, Offer> clientOffers;
+		HashMap<Integer, Offer> serverOffers;
+
+		try {
+			result_file = new PrintWriter(filename+".txt");
+			fitness_file = new PrintWriter(filename+"_fitness.txt");
+		} catch (FileNotFoundException e) {
+			System.err.println("Error creating file!");
+			e.printStackTrace();
+		}
+
+		fitness_file.println("client/server");
+		for (Map.Entry<Integer, Server> server : servers.entrySet()) {
+
+			result_file.println("Server number " + server.getKey());
+			fitness_file.println("server #:" + server.getKey());
+			
+			
+			clientOffers = server.getValue().getOppositeAgentOffers();
+			serverOffers = server.getValue().getCounterOffers();
+
+			int iteration = 1;
+			
+			while (iteration < clientOffers.size()
+					&& iteration < serverOffers.size()) {
+
+				result_file.println("Iteration: " + iteration);
+				
+				fitness_file.append(new Integer(iteration).toString()+" ");
+				
+				result_file.println("Client: "
+						+ clientOffers.get(iteration).toString());
+				fitness_file.append(new Float(clientOffers.get(iteration).getFitness())+" ");
+				
+				result_file.println("Server: "
+						+ serverOffers.get(iteration).toString());
+				fitness_file.println(new Float(serverOffers.get(iteration).getFitness()));
+
+				iteration++;
+			}
+		}
+
+		result_file.close();
+		fitness_file.close();
 	}
 
 }
