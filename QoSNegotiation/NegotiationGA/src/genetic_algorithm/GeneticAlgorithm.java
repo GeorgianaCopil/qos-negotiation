@@ -14,27 +14,40 @@ public class GeneticAlgorithm {
 	private double mutationRate;
 	private Crossover crossover;
 	private double crossoverRate;
+	private Fitness fitness;
 
 	private float[] minValues;
 	private float[] maxValues;
-
+	private float[] weights;
+	
 	private Chromosome goal;
 	
-	public GeneticAlgorithm(float[] minValues, float maxValues[],
+	public GeneticAlgorithm(float[] minValues, float maxValues[], float[] weights,
 			int populationSize) {
-
-		this.selection = new Selection();
-		this.crossover = new Crossover();
-		this.mutation = new Mutation();
-
+		
 		this.minValues = minValues;
 		this.maxValues = maxValues;
+		this.weights = weights;
 
+		this.selection = new Selection();
+		
+		this.crossover = new Crossover();
+		crossover.setMinValues(minValues);
+		crossover.setMaxValues(maxValues);
+		
+		this.mutation = new Mutation();
+		mutation.setMinValues(minValues);
+		mutation.setMaxValues(maxValues);
+		
+		fitness = new Fitness();
+		fitness.setMaxValues(maxValues);
+		fitness.setMinValues(minValues);
+		
 		this.populationSize = populationSize;
 		this.population = new ArrayList<Chromosome>();
 		
 		generation = 0;
-
+		inititializePopulation(1);
 	}
 
 	public void inititializePopulation(float percent) {
@@ -52,13 +65,15 @@ public class GeneticAlgorithm {
 		float[] genes = new float[Chromosome.genesNo];
 
 		for (int i = 0; i < Chromosome.genesNo; i++)
-			genes[i] = (float) (maxValues[i] - Math.random()
-					* (maxValues[i] - minValues[i]))
-					* percent;
+			genes[i] = (float) (minValues[i] + Math.random()
+					* (maxValues[i] - minValues[i])*percent);
 		
 		//TODO rate chromosome
+		Chromosome chromo = new Chromosome(genes);
+			
+		chromo.setFitness(fitness.percents(chromo.getGenes(), weights));
 
-		return new Chromosome(genes);
+		return chromo;
 	}
 	
 	public void evolve(){
@@ -85,6 +100,7 @@ public class GeneticAlgorithm {
 		offspring = mutation.uniformMutation(offspring);
 		
 		//TODO rate offspring
+		offspring.setFitness(fitness.percents(offspring.getGenes(), weights));
 		
 		population.remove(worstParent);
 		population.add(offspring);
@@ -104,6 +120,7 @@ public class GeneticAlgorithm {
 			population.remove(parent);
 			
 			offspring = crossover.arithmeticCrossover(chromosome, parent);
+			offspring.setFitness(fitness.percents(offspring.getGenes(), weights));
 			//TODO rate chromo
 			chromoPool.add(offspring);
 			
@@ -129,7 +146,9 @@ public class GeneticAlgorithm {
 		
 		chromo.setGenes(genes);
 		
+		
 		//TODO rate chromosome
+		chromo.setFitness(fitness.percents(chromo.getGenes(), weights));
 		
 	}
 
