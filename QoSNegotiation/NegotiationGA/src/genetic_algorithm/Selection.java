@@ -15,11 +15,11 @@ public class Selection {
 		while (it.hasNext())
 			sum += (it.next()).getFitness();
 
-		float random = (float) (Math.random() * sum);
+		float random = (float) (Math.random() * sum)+1;
 		float s = 0;
 		Iterator<Chromosome> iterator = population.iterator();
 		Chromosome chromo = null;
-		while (iterator.hasNext() && (chromo = iterator.next()) != null
+		while (iterator.hasNext() 
 				&& s < random) {
 			chromo = (Chromosome) iterator.next();
 			s += chromo.getFitness();

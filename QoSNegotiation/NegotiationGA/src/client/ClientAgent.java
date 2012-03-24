@@ -41,6 +41,8 @@ public class ClientAgent extends Agent implements Negotiation {
 	private float[] maxValues;
 	private float[] resourceWeight;
 	
+	private float[] goal;
+	
 
 	@Override
 	public boolean acceptOffer(Offer offer) {
@@ -67,7 +69,7 @@ public class ClientAgent extends Agent implements Negotiation {
 
 		offersNo++;
 
-		availableTime = System.currentTimeMillis() - totalTime;
+		availableTime = totalTime - System.currentTimeMillis();
 
 		if (availableTime > 0) {
 
@@ -142,13 +144,14 @@ public class ClientAgent extends Agent implements Negotiation {
 		String max_values = properties.getProperty("negotiation.resource_max");
 		String min_values = properties.getProperty("negotiation.resource_min");
 		String weight_values = properties.getProperty("negotiation.resource_weight");
-		
+		String goal_values = properties.getProperty("negotiation.goal");
 		
 		String[] temp;
 		String delimiter = " ";
 		
 		maxValues = new float[resourceNo];
 		minValues = new float[resourceNo];
+		goal = new float[resourceNo];
 		resourceWeight = new float[resourceNo];
 		
 		// maximul pentru fiecare resursa
@@ -166,6 +169,10 @@ public class ClientAgent extends Agent implements Negotiation {
 		 for(int i = 0; i< temp.length; i++)
 			 resourceWeight[i] = new Float(temp[i]);
 
+		 // goal-ul agentului
+		 temp = goal_values.split(delimiter);
+		 for(int i = 0; i < temp.length; i++)
+			 goal[i] = new Float(temp[i]);
 		
 		initialize();
 		
@@ -257,11 +264,11 @@ public class ClientAgent extends Agent implements Negotiation {
 	private void initialize(){
 		
 		geneticAlgorithm = new GeneticAlgorithm(minValues, maxValues, resourceWeight, populationSize);
+		geneticAlgorithm.setGoal(new Chromosome(goal));
 		
 		offersNo = 1;
 		
 		fitness = new Fitness();
-		//TODO
 		fitness.setGoal(maxValues);
 		fitness.setResourceWeight(resourceWeight);
 		fitness.setMaxValues(maxValues);
@@ -313,6 +320,13 @@ public class ClientAgent extends Agent implements Negotiation {
 	public void setMaxValues(float[] maxValues) {
 		this.maxValues = maxValues;
 	}
-	
+
+	public float[] getGoal() {
+		return goal;
+	}
+
+	public void setGoal(float[] goal) {
+		this.goal = goal;
+	}
 	
 }

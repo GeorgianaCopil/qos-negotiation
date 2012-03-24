@@ -18,8 +18,9 @@ public class Fitness {
 		
 			resourcesPercent[i] = (resources[i] -  minValues[i])/(maxValues[i] - minValues[i]);
 			
-			if(goal[i] == minValues[i])
+			if(goal[i] == minValues[i]){
 				resourcesPercent[i] = 1 - resourcesPercent[i];
+			}
 		}
 		
 		for(int i = 0; i < resourcesPercent.length; i++)
