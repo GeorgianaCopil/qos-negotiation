@@ -1,6 +1,7 @@
 package genetic_algorithm;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class GeneticAlgorithm {
 
@@ -130,7 +131,8 @@ public class GeneticAlgorithm {
 			
 		}while(numberOfSelectedChromosomes > 0);
 		
-		Chromosome selectedChromosome = selection.rouletteWheelSelection(chromoPool);
+	//	Chromosome selectedChromosome = selection.rouletteWheelSelection(chromoPool);
+		Chromosome selectedChromosome = averageChromosome(chromoPool);
 		population.addAll(chromoPool);
 		
 		
@@ -150,10 +152,30 @@ public class GeneticAlgorithm {
 		
 		chromo.setGenes(genes);
 		
-		
-		//TODO rate chromosome
 		chromo.setFitness(fitness.percents(chromo.getGenes(), weights));
 		
+	}
+	
+	public Chromosome averageChromosome(ArrayList<Chromosome> chromosomes){
+		
+		Iterator<Chromosome> chromosomesIterator =chromosomes.iterator(); 
+		
+		float[] averageGenes = new float[Chromosome.genesNo];
+		float[] genes;
+		
+		int size = chromosomes.size();
+		
+		for(int i = 0; i< averageGenes.length; i++)
+			averageGenes[i] = 0;
+		
+		while(chromosomesIterator.hasNext()){
+			
+			genes = chromosomesIterator.next().getGenes();
+			for(int i = 0; i< genes.length; i++)
+				averageGenes[i] = averageGenes[i] + genes[i]/size;
+		}
+		
+		return new Chromosome(averageGenes);
 	}
 
 	public int getGeneration() {

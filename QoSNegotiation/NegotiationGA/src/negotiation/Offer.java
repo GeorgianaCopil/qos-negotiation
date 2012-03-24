@@ -50,4 +50,6 @@ public class Offer implements Serializable {
 		
 		return  offer.toString();
 	}
+	
+	
 }
