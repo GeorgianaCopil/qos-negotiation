@@ -50,7 +50,6 @@ public class GeneticAlgorithm {
 		this.population = new ArrayList<Chromosome>();
 		
 		generation = 0;
-		inititializePopulation(1);
 	}
 
 	public void inititializePopulation(float percent) {
@@ -68,8 +67,12 @@ public class GeneticAlgorithm {
 		float[] genes = new float[Chromosome.genesNo];
 
 		for (int i = 0; i < Chromosome.genesNo; i++)
+			if(goal.getGenes()[i] == minValues[i])
 			genes[i] = (float) (minValues[i] + Math.random()
 					* (maxValues[i] - minValues[i])*percent);
+			else
+				genes[i] = (float) (minValues[i]+percent*(maxValues[i]-minValues[i]) + Math.random()
+						* (maxValues[i] - minValues[i])*(1-percent));
 		
 		Chromosome chromo = new Chromosome(genes);
 			
@@ -121,7 +124,7 @@ public class GeneticAlgorithm {
 			parent = selection.rouletteWheelSelection(population);
 			
 			
-			offspring = crossover.heuristicCrossover(chromosome, parent);
+			offspring = crossover.arithmeticCrossover(chromosome, parent);
 			offspring.setFitness(fitness.percents(offspring.getGenes(), weights));
 			chromoPool.add(offspring);
 				

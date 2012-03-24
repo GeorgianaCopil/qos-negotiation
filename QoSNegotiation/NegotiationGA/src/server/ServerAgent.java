@@ -62,6 +62,7 @@ public class ServerAgent extends Agent implements Negotiation {
 
 		fitness.rateOffer(offer);
 
+		oppositeAgentOffers.add(offer);
 		if (offer.getFitness() > (1-threshold)) {
 			return true;
 
@@ -86,6 +87,8 @@ public class ServerAgent extends Agent implements Negotiation {
 
 			fitness.rateOffer(counterOffer);
 
+			counterOffers.add(counterOffer);
+			
 			return counterOffer;
 		}
 
@@ -208,6 +211,8 @@ public class ServerAgent extends Agent implements Negotiation {
 				+ this.getContainerController().getPlatformName()));
 
 		this.send(msg);
+		
+		printNegotiationResults("server");
 	}
 
 	@SuppressWarnings("deprecation")
@@ -252,6 +257,7 @@ public class ServerAgent extends Agent implements Negotiation {
 		geneticAlgorithm = new GeneticAlgorithm(minValues, maxValues, resourceWeight,
 				populationSize);
 		geneticAlgorithm.setGoal(new Chromosome(goal));
+		geneticAlgorithm.inititializePopulation(0.3f);
 		
 		setOffersNo(0);
 
@@ -287,7 +293,7 @@ public class ServerAgent extends Agent implements Negotiation {
 				&& iteration < oppositeAgentOffers.size()) {
 
 			result_file.println("Iteration " + iteration);
-			fitness_file.append(new Integer(iteration).toString()+" ");
+			fitness_file.println(new Integer(iteration).toString()+" ");
 			if (iteration > 0) {
 
 				result_file.println("Client "+ oppositeAgentOffers.get(iteration).toString());

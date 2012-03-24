@@ -40,7 +40,7 @@ public class ReceiveMessageBehaviour extends CyclicBehaviour {
 				if (serverAgent.acceptOffer(offer)) {
 					System.err.println("Server: Offer accepted ");
 					serverAgent.sendAcceptOfferMessage();
-
+					
 				} else {
 					Offer counterOffer = serverAgent.computeCounterOffer(offer);
 
@@ -61,6 +61,7 @@ public class ReceiveMessageBehaviour extends CyclicBehaviour {
 		}
 			break;
 		case ACLMessage.ACCEPT_PROPOSAL: {
+			serverAgent.printNegotiationResults("server");
 			System.out.println("Server: WoooHooo!");
 		}
 			break;

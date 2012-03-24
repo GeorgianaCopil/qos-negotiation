@@ -75,18 +75,22 @@ public class ClientAgent extends Agent implements Negotiation {
 
 		offersNo++;
 
+		oppositeAgentOffers.add(offer);
+		
 		availableTime = totalTime - System.currentTimeMillis();
 
 		if (availableTime > 0) {
 
 			Chromosome selectedChromosome = geneticAlgorithm.alterPopulation(
 					offer.toChromosome(), numberOfAffectedIndividuals());
-
+			
 			Offer counterOffer = new Offer();
 			counterOffer.setResources(selectedChromosome.getGenes());
 
 			fitness.rateOffer(counterOffer);
 
+			counterOffers.add(counterOffer);
+			
 			return counterOffer;
 		}
 
@@ -201,6 +205,8 @@ public class ClientAgent extends Agent implements Negotiation {
 			
 			offer.setResources(goal);
 			
+			counterOffers.add(offer);
+			
 			msg.setContentObject(offer);
 			System.out.println("Offer number: " + offersNo);
 			System.out.println("Offer from Client:" + offer.toString());
@@ -231,6 +237,8 @@ public class ClientAgent extends Agent implements Negotiation {
 				+ this.getContainerController().getPlatformName()));
 		
 		this.send(msg);
+		
+		printNegotiationResults("client");
 	}
 
 	@SuppressWarnings("deprecation")
@@ -275,6 +283,7 @@ public class ClientAgent extends Agent implements Negotiation {
 		
 		geneticAlgorithm = new GeneticAlgorithm(minValues, maxValues, resourceWeight, populationSize);
 		geneticAlgorithm.setGoal(new Chromosome(goal));
+		geneticAlgorithm.inititializePopulation(0.5f);
 		
 		offersNo = 1;
 		
@@ -318,13 +327,13 @@ public class ClientAgent extends Agent implements Negotiation {
 			if (iteration > 0) {
 
 				result_file.println("Client "+ counterOffers.get(iteration).toString());
-				fitness_file.append(new Float(oppositeAgentOffers.get(iteration).getFitness()).toString());
+				fitness_file.append(new Float(counterOffers.get(iteration).getFitness()).toString());
 				fitness_file.append(" ");
 				
 				result_file.println("Server "
 						+ counterOffers.get(iteration).toString());
 				fitness_file.append(new Float(oppositeAgentOffers.get(iteration).getFitness()).toString());
-				fitness_file.append(" ");
+				fitness_file.println(" ");
 				
 			
 			}
