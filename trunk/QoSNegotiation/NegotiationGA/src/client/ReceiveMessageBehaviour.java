@@ -61,6 +61,7 @@ public class ReceiveMessageBehaviour extends CyclicBehaviour {
 		}
 			break;
 		case ACLMessage.ACCEPT_PROPOSAL: {
+			clientAgent.printNegotiationResults("client");
 			System.out.println("Client: WoooHooo!");
 		}
 			break;
