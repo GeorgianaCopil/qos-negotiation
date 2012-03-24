@@ -34,10 +34,12 @@ public class GeneticAlgorithm {
 		this.crossover = new Crossover();
 		crossover.setMinValues(minValues);
 		crossover.setMaxValues(maxValues);
+		crossover.setCrossoverRate(1);
 		
 		this.mutation = new Mutation();
 		mutation.setMinValues(minValues);
 		mutation.setMaxValues(maxValues);
+		mutation.setMutationRate(0.07);
 		
 		fitness = new Fitness();
 		fitness.setMaxValues(maxValues);
@@ -68,7 +70,6 @@ public class GeneticAlgorithm {
 			genes[i] = (float) (minValues[i] + Math.random()
 					* (maxValues[i] - minValues[i])*percent);
 		
-		//TODO rate chromosome
 		Chromosome chromo = new Chromosome(genes);
 			
 		chromo.setFitness(fitness.percents(chromo.getGenes(), weights));
@@ -78,6 +79,7 @@ public class GeneticAlgorithm {
 	
 	public void evolve(){
 		
+	
 		Chromosome parent1, parent2;
 		Chromosome worstParent, bestParent;
 		Chromosome offspring;
@@ -99,7 +101,6 @@ public class GeneticAlgorithm {
 		offspring = crossover.heuristicCrossover(worstParent, bestParent);
 		offspring = mutation.uniformMutation(offspring);
 		
-		//TODO rate offspring
 		offspring.setFitness(fitness.percents(offspring.getGenes(), weights));
 		
 		population.remove(worstParent);
@@ -117,18 +118,21 @@ public class GeneticAlgorithm {
 		do{
 			
 			parent = selection.rouletteWheelSelection(population);
-			population.remove(parent);
 			
-			offspring = crossover.arithmeticCrossover(chromosome, parent);
+			
+			offspring = crossover.heuristicCrossover(chromosome, parent);
 			offspring.setFitness(fitness.percents(offspring.getGenes(), weights));
-			//TODO rate chromo
 			chromoPool.add(offspring);
+				
+			population.remove(parent);
 			
 			numberOfSelectedChromosomes--;
 			
 		}while(numberOfSelectedChromosomes > 0);
 		
 		Chromosome selectedChromosome = selection.rouletteWheelSelection(chromoPool);
+		population.addAll(chromoPool);
+		
 		
 		return selectedChromosome;
 	}

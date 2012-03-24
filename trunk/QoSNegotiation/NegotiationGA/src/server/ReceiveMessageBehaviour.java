@@ -34,6 +34,7 @@ public class ReceiveMessageBehaviour extends CyclicBehaviour {
 		case ACLMessage.INFORM_REF: {
 			try {
 
+				
 				Offer offer = (Offer) message.getContentObject();
 
 				if (serverAgent.acceptOffer(offer)) {
@@ -47,6 +48,7 @@ public class ReceiveMessageBehaviour extends CyclicBehaviour {
 						serverAgent.sendRefuseOfferMessage();
 					else {
 
+						
 						serverAgent.sendMessage(counterOffer);
 						serverAgent.waitForOffer();
 

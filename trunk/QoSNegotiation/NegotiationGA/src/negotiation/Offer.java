@@ -38,5 +38,16 @@ public class Offer implements Serializable {
 		this.resources = resources;
 	}
 	
-	
+	@Override
+	public String toString(){
+		
+		StringBuffer offer = new StringBuffer();
+		
+		offer.append("Offer: ");
+		for(int i = 0; i< resources.length; i++)
+			offer.append(resources[i]+ " ");
+		
+		
+		return  offer.toString();
+	}
 }

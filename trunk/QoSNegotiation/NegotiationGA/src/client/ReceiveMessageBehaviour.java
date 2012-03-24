@@ -36,7 +36,6 @@ public class ReceiveMessageBehaviour extends CyclicBehaviour {
 				
 				Offer offer = (Offer) message
 						.getContentObject();
-			
 				if (clientAgent.acceptOffer(offer)){
 					System.err.println("Client: Offer accepted ");
 					clientAgent.sendAcceptOfferMessage();
@@ -44,9 +43,10 @@ public class ReceiveMessageBehaviour extends CyclicBehaviour {
 				}
 				else {
 					Offer counterOffer = clientAgent.computeCounterOffer(offer);
-					
-					if (counterOffer == null)
+					if (counterOffer == null){
+						System.out.println("aici");
 						clientAgent.sendRefuseOfferMessage();
+					}
 					else {
 						
 						clientAgent.sendMessage(counterOffer);

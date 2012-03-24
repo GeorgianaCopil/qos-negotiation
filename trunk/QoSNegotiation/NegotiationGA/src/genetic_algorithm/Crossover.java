@@ -62,6 +62,7 @@ public class Crossover {
 			return new Chromosome(genes);
 
 		}
+		
 		return parent1;
 	}
 

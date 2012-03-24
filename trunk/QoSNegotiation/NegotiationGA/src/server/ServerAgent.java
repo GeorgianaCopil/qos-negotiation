@@ -51,10 +51,11 @@ public class ServerAgent extends Agent implements Negotiation {
 
 		threshold = thresholdUpper - (thresholdUpper - thresholdLower)
 				* (scaleThreshold / (scaleThreshold + 5));
+		
 
 		fitness.rateOffer(offer);
 
-		if (offer.getFitness() > threshold) {
+		if (offer.getFitness() > (1-threshold)) {
 			return true;
 
 		}
@@ -67,8 +68,7 @@ public class ServerAgent extends Agent implements Negotiation {
 
 		offersNo++;
 
-		availableTime = System.currentTimeMillis() - totalTime;
-
+		availableTime = totalTime - System.currentTimeMillis();
 		if (availableTime > 0) {
 
 			Chromosome selectedChromosome = geneticAlgorithm.alterPopulation(
@@ -167,10 +167,11 @@ public class ServerAgent extends Agent implements Negotiation {
 
 		initialize();
 
+		addBehaviour(new ReceiveMessageBehaviour(this));
+		
 		System.out.println("Server agent - READY! ");
 		
-		addBehaviour(new ReceiveMessageBehaviour(this));
-
+		
 	}
 
 	@SuppressWarnings("deprecation")
@@ -198,7 +199,7 @@ public class ServerAgent extends Agent implements Negotiation {
 		try {
 			msg.setContentObject(offer);
 			System.out.println("Offer number: " + offersNo);
-			System.out.println("Offer from Client:" + offer.toString());
+			System.out.println("Offer from Server:" + offer.toString());
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -237,7 +238,6 @@ public class ServerAgent extends Agent implements Negotiation {
 		offersNo = 1;
 
 		fitness = new Fitness();
-		//TODO
 		fitness.setGoal(minValues);
 		fitness.setResourceWeight(resourceWeight);
 		fitness.setMinValues(minValues);
