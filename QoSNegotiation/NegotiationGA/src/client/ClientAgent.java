@@ -3,6 +3,8 @@ package client;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import genetic_algorithm.Chromosome;
@@ -43,6 +45,10 @@ public class ClientAgent extends Agent implements Negotiation {
 	
 	private float[] goal;
 	
+	// stocarea ofertelor
+	private ArrayList<Offer> counterOffers;
+	private ArrayList<Offer> oppositeAgentOffers;
+
 
 	@Override
 	public boolean acceptOffer(Offer offer) {
@@ -176,6 +182,9 @@ public class ClientAgent extends Agent implements Negotiation {
 		
 		initialize();
 		
+		oppositeAgentOffers = new ArrayList<Offer>();
+		counterOffers = new ArrayList<Offer>();
+		
 		System.out.println("Client agent - READY! ");
 		
 		addBehaviour(new ReceiveMessageBehaviour(this));
@@ -190,9 +199,10 @@ public class ClientAgent extends Agent implements Negotiation {
 
 			Offer offer = new Offer();
 			
-			offer.setResources(maxValues);
+			offer.setResources(goal);
 			
 			msg.setContentObject(offer);
+			System.out.println("Offer number: " + offersNo);
 			System.out.println("Offer from Client:" + offer.toString());
 			waitForOffer();
 			
@@ -269,12 +279,66 @@ public class ClientAgent extends Agent implements Negotiation {
 		offersNo = 1;
 		
 		fitness = new Fitness();
-		fitness.setGoal(maxValues);
+		
+		fitness.setGoal(goal);
 		fitness.setResourceWeight(resourceWeight);
 		fitness.setMaxValues(maxValues);
 		fitness.setMinValues(minValues);
+		
+		
 	}
 	
+	
+	// ##############################################################################################################
+	// PRINT RESULTS
+	// ##############################################################################################################
+	
+	public void printNegotiationResults(String fileName) {
+
+		PrintWriter result_file = null;
+		PrintWriter fitness_file = null;
+
+		try {
+			result_file = new PrintWriter(fileName+".txt");
+			fitness_file = new PrintWriter(fileName+"_fitness.txt");
+		} catch (FileNotFoundException e) {
+			System.err.println("Error creating file!");
+			e.printStackTrace();
+		}
+
+		int iteration = 1;
+		
+		fitness_file.println("client - server");
+		
+		while (iteration < counterOffers.size()
+				&& iteration < oppositeAgentOffers.size()) {
+
+			result_file.println("Iteration " + iteration);
+			fitness_file.append(new Integer(iteration).toString()+" ");
+			if (iteration > 0) {
+
+				result_file.println("Client "+ counterOffers.get(iteration).toString());
+				fitness_file.append(new Float(oppositeAgentOffers.get(iteration).getFitness()).toString());
+				fitness_file.append(" ");
+				
+				result_file.println("Server "
+						+ counterOffers.get(iteration).toString());
+				fitness_file.append(new Float(oppositeAgentOffers.get(iteration).getFitness()).toString());
+				fitness_file.append(" ");
+				
+			
+			}
+
+		
+			iteration++;
+
+		}
+
+		result_file.close();
+		fitness_file.close();
+
+	}
+
 	
 
 	// ##############################################################################################################

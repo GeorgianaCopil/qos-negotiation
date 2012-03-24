@@ -3,6 +3,8 @@ package server;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import genetic_algorithm.Chromosome;
@@ -41,6 +43,11 @@ public class ServerAgent extends Agent implements Negotiation {
 	private float[] minValues;
 	private float[] maxValues;
 	private float[] resourceWeight;
+	private float[] goal;
+	
+	// stocarea ofertelor
+	private ArrayList<Offer> counterOffers;
+	private ArrayList<Offer> oppositeAgentOffers;
 
 	@Override
 	public boolean acceptOffer(Offer offer) {
@@ -66,7 +73,7 @@ public class ServerAgent extends Agent implements Negotiation {
 	@Override
 	public Offer computeCounterOffer(Offer offer) {
 
-		offersNo++;
+		setOffersNo(getOffersNo() + 1);
 
 		availableTime = totalTime - System.currentTimeMillis();
 		if (availableTime > 0) {
@@ -142,12 +149,14 @@ public class ServerAgent extends Agent implements Negotiation {
 		String min_values = properties.getProperty("negotiation.resource_min");
 		String weight_values = properties
 				.getProperty("negotiation.resource_weight");
+		String goal_values = properties.getProperty("negotiation.goal");
 
 		String[] temp;
 		String delimiter = " ";
 
 		maxValues = new float[resourceNo];
 		minValues = new float[resourceNo];
+		goal = new float[resourceNo];
 		resourceWeight = new float[resourceNo];
 
 		// maximul pentru fiecare resursa
@@ -164,8 +173,16 @@ public class ServerAgent extends Agent implements Negotiation {
 		temp = weight_values.split(delimiter);
 		for (int i = 0; i < temp.length; i++)
 			resourceWeight[i] = new Float(temp[i]);
+		
+		 // goal-ul agentului
+		 temp = goal_values.split(delimiter);
+		 for(int i = 0; i < temp.length; i++)
+			 goal[i] = new Float(temp[i]);
 
 		initialize();
+		
+		oppositeAgentOffers = new ArrayList<Offer>();
+		counterOffers = new ArrayList<Offer>();
 
 		addBehaviour(new ReceiveMessageBehaviour(this));
 		
@@ -198,7 +215,7 @@ public class ServerAgent extends Agent implements Negotiation {
 		ACLMessage msg = new ACLMessage(ACLMessage.INFORM_REF);
 		try {
 			msg.setContentObject(offer);
-			System.out.println("Offer number: " + offersNo);
+			//System.out.println("Offer number: " + offersNo);
 			System.out.println("Offer from Server:" + offer.toString());
 
 		} catch (IOException e) {
@@ -234,16 +251,68 @@ public class ServerAgent extends Agent implements Negotiation {
 
 		geneticAlgorithm = new GeneticAlgorithm(minValues, maxValues, resourceWeight,
 				populationSize);
-
-		offersNo = 1;
+		geneticAlgorithm.setGoal(new Chromosome(goal));
+		
+		setOffersNo(0);
 
 		fitness = new Fitness();
-		fitness.setGoal(minValues);
+		fitness.setGoal(goal);
 		fitness.setResourceWeight(resourceWeight);
 		fitness.setMinValues(minValues);
 		fitness.setMaxValues(maxValues);
 	}
 
+	// ##############################################################################################################
+	// PRINT RESULTS
+	// ##############################################################################################################
+	
+	public void printNegotiationResults(String fileName) {
+
+		PrintWriter result_file = null;
+		PrintWriter fitness_file = null;
+
+		try {
+			result_file = new PrintWriter(fileName+".txt");
+			fitness_file = new PrintWriter(fileName+"_fitness.txt");
+		} catch (FileNotFoundException e) {
+			System.err.println("Error creating file!");
+			e.printStackTrace();
+		}
+
+		int iteration = 1;
+		
+		fitness_file.println("client - server");
+		
+		while (iteration < counterOffers.size()
+				&& iteration < oppositeAgentOffers.size()) {
+
+			result_file.println("Iteration " + iteration);
+			fitness_file.append(new Integer(iteration).toString()+" ");
+			if (iteration > 0) {
+
+				result_file.println("Client "+ oppositeAgentOffers.get(iteration).toString());
+				fitness_file.append(new Float(oppositeAgentOffers.get(iteration).getFitness()).toString());
+				fitness_file.append(" ");
+				
+				result_file.println("Server "
+						+ counterOffers.get(iteration).toString());
+				fitness_file.append(new Float(counterOffers.get(iteration).getFitness()).toString());
+				fitness_file.append(" ");
+				
+			
+			}
+
+		
+			iteration++;
+
+		}
+
+		result_file.close();
+		fitness_file.close();
+
+	}
+
+	
 	// ##############################################################################################################
 	// GETTERS AND SETTERS
 	// ##############################################################################################################
@@ -286,6 +355,14 @@ public class ServerAgent extends Agent implements Negotiation {
 
 	public void setMaxValues(float[] maxValues) {
 		this.maxValues = maxValues;
+	}
+
+	public int getOffersNo() {
+		return offersNo;
+	}
+
+	public void setOffersNo(int offersNo) {
+		this.offersNo = offersNo;
 	}
 
 }
