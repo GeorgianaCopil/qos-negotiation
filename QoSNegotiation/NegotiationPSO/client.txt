@@ -1,0 +1,31 @@
+Iteration 0
+Iteration 1
+Client Offer: 3129.691 856.5711 2360.8396 
+Server Offer: 3129.691 856.5711 2360.8396 
+Iteration 2
+Client Offer: 2978.2393 806.2497 2164.5793 
+Server Offer: 2978.2393 806.2497 2164.5793 
+Iteration 3
+Client Offer: 3259.822 795.8835 2006.1359 
+Server Offer: 3259.822 795.8835 2006.1359 
+Iteration 4
+Client Offer: 3259.2844 795.2699 2044.0807 
+Server Offer: 3259.2844 795.2699 2044.0807 
+Iteration 5
+Client Offer: 3329.8088 792.7958 2091.2026 
+Server Offer: 3329.8088 792.7958 2091.2026 
+Iteration 6
+Client Offer: 3213.95 760.3431 2116.268 
+Server Offer: 3213.95 760.3431 2116.268 
+Iteration 7
+Client Offer: 3155.8425 748.68945 2128.9045 
+Server Offer: 3155.8425 748.68945 2128.9045 
+Iteration 8
+Client Offer: 3079.5857 721.76196 2154.2395 
+Server Offer: 3079.5857 721.76196 2154.2395 
+Iteration 9
+Client Offer: 3034.4612 715.4688 2165.9973 
+Server Offer: 3034.4612 715.4688 2165.9973 
+Iteration 10
+Client Offer: 2955.2083 698.1118 2172.9253 
+Server Offer: 2955.2083 698.1118 2172.9253 
