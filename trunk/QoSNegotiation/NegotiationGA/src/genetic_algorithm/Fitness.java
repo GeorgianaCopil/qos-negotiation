@@ -4,13 +4,25 @@ public class Fitness {
 	
 	private float[] minValues;
 	private float[] maxValues;
+	private float[] goal;
 	
-	public float percents(float[] genes, float[] weights){
+	public float percents(float[] gene, float[] weight){
 		
 		float fitness = 0;
 		
-		for(int i = 0; i < genes.length; i++)
-			fitness+= (genes[i] - minValues[i])/(maxValues[i]-minValues[i])*weights[i];
+		
+		float[] genePercent = new float[Chromosome.genesNo];
+		for(int i = 0; i < gene.length; i++){
+			
+			genePercent[i] = (gene[i] -  minValues[i])/(maxValues[i] - minValues[i]);
+			
+			if(goal[i] == minValues[i]){
+				genePercent[i] = 1 - genePercent[i];
+			}
+		}
+		
+		for(int i = 0; i < genePercent.length; i++)
+			fitness+= genePercent[i]*weight[i];
 		
 		return fitness;	
 	}
@@ -50,6 +62,16 @@ public class Fitness {
 	public void setMaxValues(float[] maxValues) {
 		this.maxValues = maxValues;
 	}
+
+	public float[] getGoal() {
+		return goal;
+	}
+
+	public void setGoal(float[] goal) {
+		this.goal = goal;
+	}
+	
+	
 	
 	
 }

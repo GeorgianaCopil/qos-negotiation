@@ -46,6 +46,7 @@ public class GeneticAlgorithm {
 		fitness.setMaxValues(maxValues);
 		fitness.setMinValues(minValues);
 		
+		
 		this.populationSize = populationSize;
 		this.population = new ArrayList<Chromosome>();
 		
@@ -104,6 +105,7 @@ public class GeneticAlgorithm {
 		
 		offspring = crossover.heuristicCrossover(worstParent, bestParent);
 		offspring = mutation.uniformMutation(offspring);
+		chromosomeConsistency(offspring);
 		
 		offspring.setFitness(fitness.percents(offspring.getGenes(), weights));
 		
@@ -126,6 +128,7 @@ public class GeneticAlgorithm {
 			
 			offspring = crossover.arithmeticCrossover(chromosome, parent);
 			offspring.setFitness(fitness.percents(offspring.getGenes(), weights));
+			chromosomeConsistency(offspring);
 			chromoPool.add(offspring);
 				
 			population.remove(parent);
@@ -145,12 +148,20 @@ public class GeneticAlgorithm {
 	public void chromosomeConsistency(Chromosome chromo){
 		
 		float[] genes = new float[Chromosome.genesNo];
-		
 		for(int i = 0; i < Chromosome.genesNo; i++){
 			
 			genes[i] = chromo.getGenes()[i];
-			if(chromo.getGenes()[i] < minValues[i] || chromo.getGenes()[i]>maxValues[i])
-				genes[i] = (float) (Math.random()*(minValues[i] + (maxValues[i]-minValues[i])));
+			
+			if(genes[i] < minValues[i] || genes[i]>maxValues[i]){
+				
+				System.out.println(genes[i]);
+				genes[i] = (float) (minValues[i] + (maxValues[i]-minValues[i])*Math.random());
+			
+				
+			System.out.println("new "+genes[i]);
+			if(genes[i]<minValues[i]|| genes[i]>maxValues[i])
+				System.out.println("wrong");
+			}
 		}
 		
 		chromo.setGenes(genes);
@@ -210,7 +221,9 @@ public class GeneticAlgorithm {
 	}
 
 	public void setGoal(Chromosome goal) {
+		
 		this.goal = goal;
+		fitness.setGoal(goal.getGenes());
 	}
 	
 	
