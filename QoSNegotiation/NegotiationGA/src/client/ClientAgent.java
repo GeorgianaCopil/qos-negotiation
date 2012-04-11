@@ -283,7 +283,7 @@ public class ClientAgent extends Agent implements Negotiation {
 		
 		geneticAlgorithm = new GeneticAlgorithm(minValues, maxValues, resourceWeight, populationSize);
 		geneticAlgorithm.setGoal(new Chromosome(goal));
-		geneticAlgorithm.inititializePopulation(0.5f);
+		geneticAlgorithm.inititializePopulation(1f);
 		
 		offersNo = 1;
 		
@@ -324,7 +324,7 @@ public class ClientAgent extends Agent implements Negotiation {
 
 			result_file.println("Iteration " + iteration);
 			fitness_file.append(new Integer(iteration).toString()+" ");
-			if (iteration > 0) {
+		
 
 				result_file.println("Client "+ counterOffers.get(iteration).toString());
 				fitness_file.append(new Float(counterOffers.get(iteration).getFitness()).toString());
@@ -336,7 +336,7 @@ public class ClientAgent extends Agent implements Negotiation {
 				fitness_file.println(" ");
 				
 			
-			}
+			
 
 		
 			iteration++;
