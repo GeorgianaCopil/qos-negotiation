@@ -1,0 +1,1 @@
+QoS negotiation, Pareto Optimality, Genetic and PSO approaches
